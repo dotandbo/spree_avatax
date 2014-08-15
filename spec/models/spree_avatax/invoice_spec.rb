@@ -53,7 +53,7 @@ describe SpreeAvatax::Invoice do
         its(:Qty)             { should eq 1 }
         its(:ItemCode)        { should eq line_item.variant.sku }
         its(:Amount)          { should eq line_item.price }
-        its(:Discounted)      { should be_false }
+        its(:Discounted)      { should be_falsey }
       end
 
       context "with a line item discount" do
@@ -64,14 +64,14 @@ describe SpreeAvatax::Invoice do
 
         subject               { invoice_instance.invoice.Lines.first }
         its(:Amount)          { should eq 40.0 }
-        its(:Discounted)      { should be_false }
+        its(:Discounted)      { should be_falsey }
       end
 
       context "with an order discount" do
         before { PromotionSupport.set_order_promotion(order) }
 
         subject               { invoice_instance.invoice.Lines.first }
-        its(:Discounted)      { should be_true }
+        its(:Discounted)      { should be_truthy }
       end
     end
   end
