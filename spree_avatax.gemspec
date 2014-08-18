@@ -17,7 +17,9 @@ Gem::Specification.new do |s|
   s.requirements << 'none'
 
   s.add_dependency 'spree_core',  '~> 2.3.1'
-  s.add_dependency 'avalara',     '~> 0.0.3'
+  # The 0.0.4 version can be found here:
+  # https://github.com/HoyaBoya/avalara.git
+  s.add_dependency 'avalara',     '~> 0.0.4'
   s.add_dependency 'hashie',      '~> 3.2.0'
   s.add_dependency 'multi_json'
 

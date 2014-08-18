@@ -86,4 +86,11 @@ bundle
 bundle exec rails g spree_avatax:install
 ```
 
+Getting Started With Avalara
+----------------------------
+
+You can create your test Avalara API account here:
+
+http://developer.avalara.com/getting-started
+
 Copyright (c) 2014 [HoyaBoya], released under the New BSD License

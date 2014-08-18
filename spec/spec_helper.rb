@@ -3,6 +3,7 @@ require 'hashie'
 require 'avalara'
 require 'honeybadger'
 require 'pagerduty'
+require 'rspec/its'
 
 Honeybadger.configure do |config|
   config.api_key = 'SOME-FAKE-KEY'
