@@ -16,4 +16,10 @@ class SpreeAvatax::Calculator < Spree::Calculator
   def compute(computable)
     raise DoNotUseCompute.new("The avatax calculator should never use #compute")
   end
+
+  ##
+  # TO BE IMPLEMENTED
+  def compute_shipping_rate(shipping_rate)
+    0
+  end
 end
