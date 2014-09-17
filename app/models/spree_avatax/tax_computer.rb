@@ -9,6 +9,7 @@ class SpreeAvatax::TaxComputer
   def initialize(order, options = {})
     @doc_type     = options[:doc_type]     || DEFAULT_DOC_TYPE
     @status_field = options[:status_field] || DEFAULT_STATUS_FIELD
+    @logger       = options[:logger]
 
     @order = order
   end
