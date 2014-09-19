@@ -19,7 +19,10 @@ class SpreeAvatax::TaxComputer
 
     reset_tax_attributes(order)
 
-    tax_response = Avalara.get_tax(invoice_for_order)
+    invoice = invoice_for_order
+    logger.debug(invoice)
+    puts invoice      # Trying to get logs on Heroku....:(
+    tax_response = Avalara.get_tax(invoice)
     logger.debug(tax_response)
     puts tax_response # Trying to get logs on Heroku....:(
 
