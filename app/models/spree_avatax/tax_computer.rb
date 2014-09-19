@@ -19,8 +19,12 @@ class SpreeAvatax::TaxComputer
 
     reset_tax_attributes(order)
 
-    tax_response = Avalara.get_tax(invoice_for_order)
+    invoice = invoice_for_order
+    logger.debug(invoice)
+    puts invoice      # Trying to get logs on Heroku....:(
+    tax_response = Avalara.get_tax(invoice)
     logger.debug(tax_response)
+    puts tax_response # Trying to get logs on Heroku....:(
 
     order.line_items.each do |line_item|
       tax_amount = tax_response.tax_lines.detect { |tl| tl.line_no == line_item.id.to_s }.try(:tax_calculated)
@@ -39,6 +43,25 @@ class SpreeAvatax::TaxComputer
       })
       Spree::ItemAdjustments.new(line_item).update
       line_item.save!
+    end
+
+    order.shipments.each do |shipment|
+      # Skip any shipment with no shipping method.
+      # They will not have been sent to Avatax for calculation.
+      next if shipment.shipping_method.blank?
+
+      tax_amount = tax_response.tax_lines.detect { |tl| tl.line_no == shipment.id.to_s }.try(:tax_calculated)
+      raise MissingTaxAmountError if tax_amount.nil?
+      shipment.update_column(:pre_tax_amount, shipment.discounted_amount)
+      shipment.adjustments.tax.create!(
+        :adjustable => shipment,
+        :amount => tax_amount,
+        :order => @order,
+        :label => Spree.t(:avatax_label),
+        :included => false,
+        :source => Spree::TaxRate.avatax_the_one_rate,
+        :state => 'closed',
+      )
     end
 
     Spree::OrderUpdater.new(order).update
