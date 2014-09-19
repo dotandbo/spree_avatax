@@ -21,6 +21,7 @@ class SpreeAvatax::TaxComputer
 
     tax_response = Avalara.get_tax(invoice_for_order)
     logger.debug(tax_response)
+    puts tax_response # Trying to get logs on Heroku....:(
 
     order.line_items.each do |line_item|
       tax_amount = tax_response.tax_lines.detect { |tl| tl.line_no == line_item.id.to_s }.try(:tax_calculated)
