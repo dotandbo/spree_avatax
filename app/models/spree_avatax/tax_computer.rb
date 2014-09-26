@@ -45,6 +45,21 @@ class SpreeAvatax::TaxComputer
       line_item.save!
     end
 
+    order.shipments.each do |shipment|
+      tax_amount = tax_response.tax_lines.detect { |tl| tl.line_no == shipment.id.to_s }.try(:tax_calculated)
+      raise MissingTaxAmountError if tax_amount.nil?
+      shipment.update_column(:pre_tax_amount, shipment.discounted_amount)
+      shipment.adjustments.tax.create!(
+        :adjustable => shipment,
+        :amount => tax_amount,
+        :order => @order,
+        :label => Spree.t(:avatax_label),
+        :included => false, # true for VAT
+        :source => Spree::TaxRate.avatax_the_one_rate,
+        :state => 'closed', # this tells spree not to automatically recalculate avatax tax adjustments
+      )
+    end
+
     Spree::OrderUpdater.new(order).update
     order[status_field] = Time.now
     order.save!

@@ -10,6 +10,9 @@ Spree::Order.class_eval do
   # Start calculating tax as soon as addresses are supplied
   Spree::Order.state_machine.after_transition :from => :address, :do => :avatax_compute_tax
 
+  # Calculate tax for shipping
+  Spree::Order.state_machine.after_transition :from => :delivery, :do => :avatax_compute_tax
+
   def avataxable?
     line_items.present? && ship_address.present?
   end

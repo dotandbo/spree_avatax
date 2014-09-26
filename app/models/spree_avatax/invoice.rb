@@ -41,7 +41,7 @@ class SpreeAvatax::Invoice
   end
 
   def build_invoice_lines
-    order.line_items.map do |line_item|
+    line_items = order.line_items.map do |line_item|
       Avalara::Request::Line.new(
         :line_no => line_item.id,
         :destination_code => DESTINATION_CODE,
@@ -52,5 +52,20 @@ class SpreeAvatax::Invoice
         :discounted => order.promotion_adjustment_total > 0.0 # Continue to pass this field if we have an order-level discount so the line item gets discount calculated onto it
       )
     end
+
+    # Add shipping as a line item for Avalara
+    line_items += order.shipments.map do |shipment|
+ Avalara::Request::Line.new(
+        :line_no => shipment.id,
+        :destination_code => DESTINATION_CODE,
+        :origin_code => ORIGIN_CODE,
+        :qty => 1,
+        :amount => shipment.cost.round(2).to_f,
+        :item_code => shipment.shipping_method.tax_category.tax_code,
+        :discounted => order.promotion_adjustment_total > 0.0 # Continue to pass this field if we have an order-level discount so the line item gets discount calculated onto it
+      )
+    end
+
+    line_items
   end
 end
