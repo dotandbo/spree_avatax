@@ -54,9 +54,9 @@ class SpreeAvatax::TaxComputer
         :amount => tax_amount,
         :order => @order,
         :label => Spree.t(:avatax_label),
-        :included => false, # true for VAT
+        :included => false,
         :source => Spree::TaxRate.avatax_the_one_rate,
-        :state => 'closed', # this tells spree not to automatically recalculate avatax tax adjustments
+        :state => 'closed',
       )
     end
 
