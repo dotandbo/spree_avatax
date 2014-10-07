@@ -46,6 +46,10 @@ class SpreeAvatax::TaxComputer
     end
 
     order.shipments.each do |shipment|
+      # Skip any shipment with no shipping method.
+      # They will not have been sent to Avatax for calculation.
+      next if shipment.shipping_method.blank?
+
       tax_amount = tax_response.tax_lines.detect { |tl| tl.line_no == shipment.id.to_s }.try(:tax_calculated)
       raise MissingTaxAmountError if tax_amount.nil?
       shipment.update_column(:pre_tax_amount, shipment.discounted_amount)

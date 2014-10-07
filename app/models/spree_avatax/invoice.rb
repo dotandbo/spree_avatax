@@ -54,8 +54,9 @@ class SpreeAvatax::Invoice
     end
 
     # Add shipping as a line item for Avalara
-    line_items += order.shipments.map do |shipment|
- Avalara::Request::Line.new(
+    # Need to check missing shipment_method before adding.
+    line_items += order.shipments.select { |s| s.shipping_method.present? }.map do |shipment|
+      Avalara::Request::Line.new(
         :line_no => shipment.id,
         :destination_code => DESTINATION_CODE,
         :origin_code => ORIGIN_CODE,
