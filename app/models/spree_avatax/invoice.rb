@@ -61,7 +61,7 @@ class SpreeAvatax::Invoice
         :destination_code => DESTINATION_CODE,
         :origin_code => ORIGIN_CODE,
         :qty => 1,
-        :amount => shipment.cost.round(2).to_f,
+        :amount => shipment.discounted_amount.round(2).to_f,
         :item_code => shipment.shipping_method.tax_category.tax_code,
         :discounted => order.promotion_adjustment_total > 0.0 # Continue to pass this field if we have an order-level discount so the line item gets discount calculated onto it
       )
