@@ -5,8 +5,10 @@ describe "Tax Calculation" do
   let(:tax_rate) { create(:tax_rate, calculator: SpreeAvatax::Calculator.new, zone: ZoneSupport.global_zone) }
   let(:order) { create(:order_with_line_items, ship_address: address) }
   let(:company_code) { 'APITrialCompany' }
+  let(:tax_category) { create :tax_category }
 
   before do
+    Spree::ShippingMethod.any_instance.stub(:tax_category).and_return(tax_category)
     setup_configs
     order.line_items.first.product.tax_category.tax_rates << tax_rate
   end

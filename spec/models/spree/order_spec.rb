@@ -11,13 +11,18 @@ describe Spree::Order do
 
   describe '#avatax_compute_tax' do
     context 'when the avatax_fingerprint is different' do
+      let(:original_fingerprint) { 'abcdef' }
+
       before do
+        subject.update_attributes!(avatax_fingerprint: original_fingerprint)
         SpreeAvatax::TaxComputer.any_instance.should_receive(:compute).once
       end
 
       it 'should set avatax_fingerprint' do
         subject.avatax_compute_tax
-        expect(subject.reload.avatax_fingerprint).to_not be_nil
+        subject.reload
+        expect(subject.avatax_fingerprint).to_not be_nil
+        expect(subject.avatax_fingerprint).to_not eq(original_fingerprint)
       end
     end
 
