@@ -3,6 +3,36 @@ require 'spec_helper'
 describe Spree::Order do
   subject { create(:order_with_line_items) }
 
+  describe '#calculate_avatax_fingerprint' do
+    it 'should hash' do
+      expect(subject.calculate_avatax_fingerprint).to_not be_nil
+    end
+  end
+
+  describe '#avatax_compute_tax' do
+    context 'when the avatax_fingerprint is different' do
+      before do
+        SpreeAvatax::TaxComputer.any_instance.should_receive(:compute).once
+      end
+
+      it 'should set avatax_fingerprint' do
+        subject.avatax_compute_tax
+        expect(subject.reload.avatax_fingerprint).to_not be_nil
+      end
+    end
+
+    context 'when the avatax_fingerprint is same' do
+      before do
+        SpreeAvatax::TaxComputer.any_instance.should_receive(:compute).never
+        subject.update_attributes!(avatax_fingerprint: subject.calculate_avatax_fingerprint)
+      end
+
+      it 'should set avatax_fingerprint' do
+        subject.avatax_compute_tax
+      end
+    end
+  end
+
   describe "#avataxable?" do
     it "returns true if there are avataxable line items and a ship address" do
       subject.stub(:line_items).and_return([1])

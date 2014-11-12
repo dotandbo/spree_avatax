@@ -1,3 +1,5 @@
+require 'digest'
+
 Spree::Order.class_eval do
 
   ##
@@ -30,6 +32,18 @@ Spree::Order.class_eval do
   ##
   # Comute avatax but do not commit it their db
   def avatax_compute_tax
-     SpreeAvatax::TaxComputer.new(self, { logger: Rails.logger}).compute
+    # Do not calculate if the current cart fingerprint is the same what we have before.
+    # Alleviate multiple API calls for the same tax amount.
+    return if avatax_fingerprint == calculate_avatax_fingerprint
+
+    SpreeAvatax::TaxComputer.new(self, { logger: Rails.logger}).compute
+    update_attributes!(avatax_fingerprint: calculate_avatax_fingerprint)
+  end
+
+  # The fingerprint hash is the # of line items, # of shipments, and order total, and the ship address entity and last update
+  def calculate_avatax_fingerprint
+    md5 = Digest::MD5.new
+    md5.update "#{self.total}#{self.line_items.count}#{self.shipments.count}#{self.ship_address.id}#{self.ship_address.updated_at}"
+    md5.hexdigest
   end
 end
