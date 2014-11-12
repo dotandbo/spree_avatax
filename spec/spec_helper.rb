@@ -61,7 +61,7 @@ RSpec.configure do |config|
   config.include Spree::TestingSupport::UrlHelpers
 
   config.include ActionView::Helpers::TagHelper
-  config.include ActionView::Context 
+  config.include ActionView::Context
 
   # == Mock Framework
   #
@@ -101,4 +101,10 @@ RSpec.configure do |config|
   end
 
   config.fail_fast = ENV['FAIL_FAST'] || false
+end
+
+# Interim fix to let this gem work with 2.3.x while we wait for latest Spree release.
+# https://github.com/spree/spree/pull/5409
+Spree::TaxCategory.class_eval do
+  attr_accessor :tax_code
 end

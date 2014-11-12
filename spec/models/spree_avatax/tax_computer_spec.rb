@@ -1,6 +1,12 @@
 require 'spec_helper'
 
 describe SpreeAvatax::TaxComputer do
+  let(:tax_category) { create :tax_category }
+
+  before do
+    Spree::ShippingMethod.any_instance.stub(:tax_category).and_return(tax_category)
+  end
+
   shared_examples "fetches new tax information" do
     before do
       Avalara.should_receive(:get_tax).and_return(double(tax_lines: order.line_items.map { |li| double(line_no: li.id.to_s, tax_calculated: 5.00) }))
@@ -41,7 +47,6 @@ describe SpreeAvatax::TaxComputer do
     subject { calculator.reset_tax_attributes(order) }
 
     before do
-
       order.line_items.each do |line_item|
         line_item.adjustments.eligible.tax.additional.create!({
           adjustable: line_item,
@@ -104,7 +109,9 @@ describe SpreeAvatax::TaxComputer do
     subject { calculator.compute }
 
     context "configuration" do
-      before { Spree::Order.any_instance.stub(:avataxable?).and_return(true) }
+      before do
+        Spree::Order.any_instance.stub(:avataxable?).and_return(true)
+      end
 
       context "order status field" do
         let(:status_field) { :avatax_invoice_at }

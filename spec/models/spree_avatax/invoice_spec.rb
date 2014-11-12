@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe SpreeAvatax::Invoice do
-
   # TODO, turns this calculator into a NOOP
   let(:calculator) { Spree::Calculator::DefaultTax.new }
   let(:doc_type) { "SalesOrder" }
@@ -9,11 +8,17 @@ describe SpreeAvatax::Invoice do
   let(:order) { create(:order_with_line_items) }
   let(:tax_rate) { create(:tax_rate, calculator: calculator, zone: ZoneSupport.global_zone) }
   let(:invoice_instance) { SpreeAvatax::Invoice.new(order, doc_type, Logger.new("/dev/null")) }
+  let(:tax_category) { create(:tax_category) }
 
   describe "#new" do
     before do
       SpreeAvatax::Config.company_code = "foo"
       order.line_items.first.product.tax_category.tax_rates << tax_rate
+
+      Spree::ShippingMethod.all.each do |sm|
+        sm.tax_category = tax_category
+        sm.save!
+      end
     end
 
     context "invoice object" do
@@ -40,7 +45,7 @@ describe SpreeAvatax::Invoice do
       its(:PostalCode)  { should eq order.ship_address.zipcode }
     end
 
-    it { invoice_instance.invoice.Lines.size.should eq order.line_items.size }
+    it { invoice_instance.invoice.Lines.size.should eq order.line_items.size + order.shipments.size }
 
     context "invoice lines" do
       let(:line_item) { order.line_items.first }
