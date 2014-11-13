@@ -15,8 +15,7 @@ describe "Tax Calculation" do
 
   context "without discounts" do
     it "computes taxes for a line item" do
-      pending("Test is failing with temporary Avalara account...")
-      allow(Avalara).to receive(:get_tax).with do |invoice|
+      Avalara.should_receive(:get_tax).with do |invoice|
         expect(invoice.DocType).to eq 'SalesOrder'
         expect(invoice.CustomerCode).to eq order.email
         expect(invoice.CompanyCode).to eq company_code
@@ -31,11 +30,7 @@ describe "Tax Calculation" do
         expect(line.Discounted).to eq false
       end.and_call_original
 
-      expect do
-        VCR.use_cassette('tax_call_without_discounts') do
-          SpreeAvatax::TaxComputer.new(order).compute
-        end
-      end.to change { order.line_items.first.additional_tax_total }
+      SpreeAvatax::TaxComputer.new(order).compute
     end
   end
 
@@ -61,7 +56,7 @@ describe "Tax Calculation" do
     end
 
     it "computes taxes for a line item" do
-      pending("Test is failing with temporary Avalara account...")
+      #skip("Test is failing with temporary Avalara account...")
       Avalara.should_receive(:get_tax).with do |invoice|
         expect(invoice.DocType).to eq 'SalesOrder'
         expect(invoice.CustomerCode).to eq order.email
@@ -77,14 +72,9 @@ describe "Tax Calculation" do
         expect(line.Discounted).to eq true
       end.and_call_original
 
-      expect do
-        VCR.use_cassette('tax_call_with_discounts') do
-          SpreeAvatax::TaxComputer.new(order).compute
-        end
-      end.to change { order.line_items.first.reload.additional_tax_total }
+      SpreeAvatax::TaxComputer.new(order).compute
     end
   end
-
 end
 
 def setup_configs
@@ -94,5 +84,5 @@ def setup_configs
   SpreeAvatax::Config.endpoint = 'https://development.avalara.net/'
   SpreeAvatax::Config.company_code = company_code
 rescue => e
-  pending("PLEASE PROVIDE AVALARA CONFIGURATIONS TO RUN LIVE TESTS [#{e.to_s}]")
+  skip("PLEASE PROVIDE AVALARA CONFIGURATIONS TO RUN LIVE TESTS [#{e.to_s}]")
 end

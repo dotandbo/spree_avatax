@@ -26,7 +26,7 @@ Spree::Order.class_eval do
   ##
   # This method sends an invoice to Avalara which is stored in their system.
   def commit_avatax_invoice
-    SpreeAvatax::TaxComputer.new(self, { doc_type: 'SalesInvoice', status_field: :avatax_invoice_at, logger: Rails.logger }).compute
+    SpreeAvatax::TaxComputer.new(self, { doc_type: 'SalesInvoice', status_field: :avatax_invoice_at }).compute
   end
 
   ##
@@ -36,14 +36,14 @@ Spree::Order.class_eval do
     # Alleviate multiple API calls for the same tax amount.
     return if avatax_fingerprint == calculate_avatax_fingerprint
 
-    SpreeAvatax::TaxComputer.new(self, { logger: Rails.logger}).compute
+    SpreeAvatax::TaxComputer.new(self).compute
     update_attributes!(avatax_fingerprint: calculate_avatax_fingerprint)
   end
 
   # The fingerprint hash is the # of line items, # of shipments, and order total, and the ship address entity and last update
   def calculate_avatax_fingerprint
     md5 = Digest::MD5.new
-    md5.update "#{self.total}#{self.line_items.count}#{self.shipments.count}#{self.ship_address.id}#{self.ship_address.updated_at}"
+    md5.update "#{self.total}#{self.line_items.count}#{self.shipping_address.try(:updated_at)}"
     md5.hexdigest
   end
 end
