@@ -13,8 +13,23 @@ class SpreeAvatax::TaxComputer
     @order = order
   end
 
-  def compute
+  def compute_amount
     return unless order.avataxable?
+
+    #reset_tax_attributes(order)
+
+    tax_response = Avalara.get_tax(invoice_for_order)
+    logger.debug(tax_response)
+    tax_total = 0
+    order.line_items.each do |line_item|
+      tax_amount = tax_response.tax_lines.detect { |tl| tl.line_no == line_item.id.to_s }.try(:tax_calculated).to_f
+      tax_total += tax_amount
+    end
+    tax_total
+  end
+
+  def compute
+    return unless order.taxable?
 
     reset_tax_attributes(order)
 
@@ -37,7 +52,7 @@ class SpreeAvatax::TaxComputer
         :state => 'closed', # this tells spree not to automatically recalculate avatax tax adjustments
       })
       Spree::ItemAdjustments.new(line_item).update
-      line_item.save!
+      #line_item.save!
     end
 
     Spree::OrderUpdater.new(order).update
@@ -52,25 +67,8 @@ class SpreeAvatax::TaxComputer
   def reset_tax_attributes(order)
     order.all_adjustments.tax.destroy_all
     order.line_items.each do |line_item|
-      line_item.update_attributes!({
-        additional_tax_total: 0,
-        adjustment_total: 0,
-        pre_tax_amount: 0,
-        included_tax_total: 0,
-      })
-
-      Spree::ItemAdjustments.new(line_item).update
-      line_item.save!
+      line_item.adjustments.tax.destroy_all
     end
-
-    order.update_attributes!({
-      additional_tax_total: 0,
-      adjustment_total: 0,
-      included_tax_total: 0,
-    })
-
-    Spree::OrderUpdater.new(order).update
-    order.save!
   end
 
   def invoice_for_order

@@ -20,7 +20,7 @@ class SpreeAvatax::Invoice
       :doc_date => Date.today,
       :doc_type => doc_type,
       :company_code => SpreeAvatax::Config.company_code,
-      :discount => order.promotion_adjustment_total.round(2).to_f,
+      :discount => 0,#order.promotion_adjustment_total.round(2).to_f,
       :doc_code => order.number
     )
     invoice.addresses = build_invoice_addresses
