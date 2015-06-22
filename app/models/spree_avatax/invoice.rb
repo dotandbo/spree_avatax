@@ -20,7 +20,7 @@ class SpreeAvatax::Invoice
       :doc_date => Date.today,
       :doc_type => doc_type,
       :company_code => SpreeAvatax::Config.company_code,
-      :discount => 0,#order.promotion_adjustment_total.round(2).to_f,
+      :discount => order.promotion_adjustment_total.round(2).to_f,
       :doc_code => order.number
     )
     invoice.addresses = build_invoice_addresses
@@ -47,7 +47,7 @@ class SpreeAvatax::Invoice
         :destination_code => DESTINATION_CODE,
         :origin_code => ORIGIN_CODE,
         :qty => line_item.quantity,
-        :amount => line_item.discounted_amount.round(2).to_f,
+        :amount => line_item.amount.round(2).to_f,
         :item_code => line_item.variant.sku,
         :discounted => order.promotion_adjustment_total > 0.0 # Continue to pass this field if we have an order-level discount so the line item gets discount calculated onto it
       )
